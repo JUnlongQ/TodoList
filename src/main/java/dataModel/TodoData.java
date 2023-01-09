@@ -1,6 +1,7 @@
 package dataModel;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -10,7 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 /**
  * Store the todaData. This is a singleton class
@@ -20,7 +20,7 @@ public class TodoData {
   private static TodoData instance = new TodoData();
   private static String filename = "TodoListItems.txt";
   private DateTimeFormatter formatter;
-  private List<TodoItem> todoItems;
+  private ObservableList<TodoItem> todoItems;
 
   public static TodoData getInstance(){
     return instance;
@@ -29,10 +29,14 @@ public class TodoData {
     formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
   }
 
-  public List<TodoItem> getTodoItems() {
+  public ObservableList<TodoItem> getTodoItems() {
     return todoItems;
   }
 
+  public void addTodoItem(TodoItem item){
+    todoItems.add(item);
+
+  }
   public void loadTodoItems() throws IOException {
     todoItems = FXCollections.observableArrayList();
     Path path = Paths.get(filename);
@@ -70,5 +74,4 @@ public class TodoData {
       }
     }
   }
-
 }

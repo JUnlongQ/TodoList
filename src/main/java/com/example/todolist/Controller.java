@@ -5,17 +5,15 @@ import dataModel.TodoItem;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TextArea;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+import java.util.Optional;
 
 public class Controller {
-  private List<TodoItem> todoItemList;
-
   @FXML
   private ListView<TodoItem> todoItemsListView;
 
@@ -24,6 +22,8 @@ public class Controller {
 
   @FXML
   private Label dealineLabel;
+  @FXML
+  private BorderPane mainBorderPane;
 
   public void initialize(){
     todoItemsListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TodoItem>() {
@@ -38,15 +38,41 @@ public class Controller {
       }
     });
 
-    todoItemsListView.getItems().setAll(TodoData.getInstance().getTodoItems());
+    todoItemsListView.setItems(TodoData.getInstance().getTodoItems());
     todoItemsListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     todoItemsListView.getSelectionModel().selectFirst();
   }
-
   @FXML
-  public void handleClickListView() {
-    TodoItem item = todoItemsListView.getSelectionModel().getSelectedItem();
-    itemDetailsTextArea.setText(item.getDetails());
-    dealineLabel.setText(item.getDeadline().toString());
+  public void showNewItemDialog() {
+    Dialog<ButtonType> dialog = new Dialog<>(); // it is modal by default
+    dialog.initOwner(mainBorderPane.getScene().getWindow());
+    dialog.setTitle("Add a new event");
+    dialog.setHeaderText("Use this dialog to create a new event");
+    FXMLLoader fxmlLoader = new FXMLLoader();
+    fxmlLoader.setLocation(getClass().getResource("todoItemDialog.fxml"));
+    try {
+      dialog.getDialogPane().setContent(fxmlLoader.load());
+    } catch (IOException e){
+      System.out.println("Could not load the dialog");
+      e.printStackTrace();
+      return;
+    }
+    dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+    dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+    Optional<ButtonType> result = dialog.showAndWait();
+    if(result.isPresent() && result.get() == ButtonType.OK){
+      DialogController controller = fxmlLoader.getController();
+      TodoItem newItem = controller.processResult();
+      todoItemsListView.getSelectionModel().select(newItem);
+
+    }
+
   }
+
+//  @FXML
+//  public void handleClickListView() {
+//    TodoItem item = todoItemsListView.getSelectionModel().getSelectedItem();
+//    itemDetailsTextArea.setText(item.getDetails());
+//    dealineLabel.setText(item.getDeadline().toString());
+//  }
 }
