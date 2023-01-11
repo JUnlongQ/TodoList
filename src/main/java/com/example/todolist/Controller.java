@@ -8,8 +8,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
+import javafx.util.Callback;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
@@ -41,6 +44,30 @@ public class Controller {
     todoItemsListView.setItems(TodoData.getInstance().getTodoItems());
     todoItemsListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     todoItemsListView.getSelectionModel().selectFirst();
+
+    todoItemsListView.setCellFactory(new Callback<ListView<TodoItem>, ListCell<TodoItem>>() {
+      @Override
+      public ListCell<TodoItem> call(ListView<TodoItem> todoItemListView) {
+        ListCell<TodoItem> cell = new ListCell<>() {
+          @Override
+          protected void updateItem(TodoItem todoItem, boolean b) {
+            super.updateItem(todoItem, b);
+            if(b){
+              super.setText(null);
+            } else {
+              setText(todoItem.getShortDescription());
+              if(todoItem.getDeadline().isBefore(LocalDate.now().plusDays(1))) {
+                setTextFill(Color.GREEN);
+              } else if(todoItem.getDeadline().equals(LocalDate.now().plusDays(1))){
+                setTextFill(Color.RED);
+              }
+            }
+          }
+        };
+
+        return cell;
+      }
+    });
   }
   @FXML
   public void showNewItemDialog() {
